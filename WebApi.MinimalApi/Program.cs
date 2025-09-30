@@ -1,5 +1,7 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Reflection;
 using WebApi.MinimalApi.Domain;
 using WebApi.MinimalApi.Models;
 using WebApi.MinimalApi.Samples;
@@ -20,13 +22,19 @@ builder.Services.AddControllers(options =>
     {
         options.SuppressModelStateInvalidFilter = true;
         options.SuppressMapClientErrors = true;
+    })
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+        options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Populate;
     });
 builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.CreateMap<UserEntity, UserDto>()
         .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.LastName} {src.FirstName}"));
-    
+    cfg.CreateMap<CreateUserDto, UserEntity>();
+
 }, Array.Empty<Assembly>());
 var app = builder.Build();
 
