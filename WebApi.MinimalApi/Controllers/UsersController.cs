@@ -26,12 +26,22 @@ public class UsersController : Controller
     [HttpGet("{userId}", Name = nameof(GetUserById))]
     public ActionResult<UserDto> GetUserById([FromRoute] Guid userId)
     {
+
         var user = userRepository.FindById(userId);
         if (user != null)
         {
             return mapper.Map<UserDto>(user);
-            
+
         }
+        return NotFound();
+    }
+
+    [HttpHead("{userId}")]
+    public ActionResult<UserDto> FindUserById([FromRoute] Guid userId)
+    {
+        var user = userRepository.FindById(userId);
+        if (user != null)
+            return Content("", "application/json; charset=utf-8");
         return NotFound();
     }
 
