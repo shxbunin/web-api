@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json.Linq;
@@ -77,7 +78,7 @@ public class UsersController : Controller
     }
 
     [HttpPut("{userId}")]
-    public IActionResult FullUpdateUser([FromRoute] string userId, [FromBody] FullUpdateUserDto user)
+    public IActionResult UpdateUser([FromRoute] string userId, [FromBody] UpdateUserDto user)
     {
         Guid userGuid;
         var isGuidValid = Guid.TryParse(userId, out userGuid);
@@ -107,6 +108,38 @@ public class UsersController : Controller
             {
                 return NoContent();
             }
+        }
+        else
+        {
+            return BadRequest();
+        }
+    }
+
+    [HttpPatch("{userId}")]
+    public IActionResult PartiallyUpdateUser([FromRoute] Guid userId, [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc)
+    {
+        if (patchDoc is not null)
+        {
+            var user = userRepository.FindById(userId);
+
+            if (user is null)
+            {
+                return NotFound();
+            }
+
+            var userDto = mapper.Map<UpdateUserDto>(user);
+            patchDoc.ApplyTo(userDto, ModelState);
+
+            TryValidateModel(userDto);
+
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            userRepository.Update(mapper.Map<UserEntity>(userDto));
+
+            return NoContent();
         }
         else
         {

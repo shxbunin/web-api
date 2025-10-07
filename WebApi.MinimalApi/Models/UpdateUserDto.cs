@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.MinimalApi.Models;
 
-public class FullUpdateUserDto
+public class UpdateUserDto
 {
     public Guid Id { get; set; }
     [Required]
