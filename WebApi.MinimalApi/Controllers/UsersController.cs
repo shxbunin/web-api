@@ -73,6 +73,44 @@ public class UsersController : Controller
         }
     }
 
+    [HttpPut("{userId}")]
+    public IActionResult FullUpdateUser([FromRoute] string userId, [FromBody] FullUpdateUserDto user)
+    {
+        Guid userGuid;
+        var isGuidValid = Guid.TryParse(userId, out userGuid);
+
+        if (user is not null && isGuidValid)
+        {
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
+            user.Id = userGuid;
+
+            bool isInserted;
+
+            userRepository.UpdateOrInsert(mapper.Map<UserEntity>(user), out isInserted);
+
+            if (isInserted)
+            {
+                return CreatedAtRoute(
+                    nameof(GetUserById),
+                    new { userId },
+                    userId);
+                
+            }
+            else
+            {
+                return NoContent();
+            }
+        }
+        else
+        {
+            return BadRequest();
+        }
+    }
+
     [HttpDelete("{userId}")]
     public IActionResult DeleteUser([FromRoute] Guid userId)
     {
