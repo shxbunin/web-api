@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using Microsoft.OpenApi.Models;
 using WebApi.MinimalApi.Domain;
 using WebApi.MinimalApi.Models;
 using WebApi.MinimalApi.Samples;
@@ -38,8 +39,12 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.CreateMap<UserEntity, UpdateUserDto>();
 
 }, Array.Empty<Assembly>());
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" }); });
+
 var app = builder.Build();
 
 app.MapControllers();
-
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
 app.Run();
